@@ -56,11 +56,11 @@ if __name__ == "__main__":
 
     while True:
         if camera_future.running() == False:
-            print("camera shutdown")
+            #print("camera shutdown")
             executor.shutdown()
             break
         else:
             time.sleep(5)
-            print("5 seconds ...")
+            #print("5 seconds ...")
 
     print("program complete")
