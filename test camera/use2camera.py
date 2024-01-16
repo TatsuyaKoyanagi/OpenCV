@@ -17,24 +17,26 @@ class captureClass():
     def capRelease(self):
         self.cap.release()
 
-def threadCapture(cap_number1, cap_number2):
+def threadCapture(cap_number1, cap_number2,cap_number3):
     cap_obj1 = captureClass(cap_number1)
     cap_obj2 = captureClass(cap_number2)
-    count = 0
+    cap_obj3 = captureClass(cap_number3)
+
     while True:
         cap_obj1.readFrame()
         cap_obj2.readFrame()
+        cap_obj3.readFrame()
         frame1 = cap_obj1.getFrame()
         frame2 = cap_obj2.getFrame()
-        frame1 = cv2.resize(frame1, (320,240))
-        frame2 = cv2.resize(frame2, (320,240))
+        frame3 = cap_obj3.getFrame()
+        frame1 = cv2.resize(frame1, (640,480))
+        frame2 = cv2.resize(frame2, (640,480))
+        frame3 = cv2.resize(frame3, (640,480))
 
-        frame = cv2.vconcat([frame1, frame2])
-        #frame = cv2.putText(frame, "count: "+str(count), (30, 30),
-         #                       cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255),1,cv2.LINE_8)
-
+        #vが縦、hが横
+        frame = cv2.vconcat([frame1, frame2,frame3])
+        
         cv2.imshow("frame", frame)
-        count += 1
         
         lastkey = cv2.waitKey(1)
         if lastkey == ord("q"):
@@ -49,14 +51,15 @@ def threadCapture(cap_number1, cap_number2):
 if __name__ == "__main__":
 
     cap_number1 = 0
-    cap_number2 = 2
+    cap_number2 = 1
+    cap_number3 = 2
     
     executor = ThreadPoolExecutor(max_workers=3)
-    camera_future = executor.submit(threadCapture, cap_number1, cap_number2)
+    camera_future = executor.submit(threadCapture, cap_number1, cap_number2,cap_number3)
 
     while True:
         if camera_future.running() == False:
-            #print("camera shutdown")
+            print("camera shutdown")
             executor.shutdown()
             break
         else:
