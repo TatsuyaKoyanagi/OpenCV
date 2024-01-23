@@ -1,5 +1,6 @@
 import cv2
 import time
+import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 import traceback
 
@@ -18,6 +19,8 @@ class captureClass():
         self.cap.release()
 
 def threadCapture(cap_number1, cap_number2,cap_number3,cap_number4):
+    final_frame_size = (1280, 960)  # 最終的な画像のサイズ
+    single_frame_size = (640, 480)  # 個々のフレームのサイズ 
     cap_obj1 = captureClass(cap_number1)
     cap_obj2 = captureClass(cap_number2)
     cap_obj3 = captureClass(cap_number3)
@@ -33,15 +36,21 @@ def threadCapture(cap_number1, cap_number2,cap_number3,cap_number4):
         frame2 = cap_obj2.getFrame()
         frame3 = cap_obj3.getFrame()
         frame4 = cap_obj4.getFrame()
-        frame1 = cv2.resize(frame1, (640,480))
-        frame2 = cv2.resize(frame2, (640,480))
-        frame3 = cv2.resize(frame3, (640,480))
-        frame4 = cv2.resize(frame4, (640,480))
+        frame1 = cv2.resize(frame1, single_frame_size)
+        frame2 = cv2.resize(frame2, single_frame_size)
+        frame3 = cv2.resize(frame3, single_frame_size)
+        frame4 = cv2.resize(frame4, single_frame_size)
 
-        #vが縦、hが横
-        frame_top = cv2.vconcat([frame1, frame2])  # Vertical concatenation of frame1 and frame2
-        frame_bottom = cv2.vconcat([frame3, frame4])  # Vertical concatenation of frame3 and frame4
-        frame = cv2.hconcat([frame_top, frame_bottom])  # Horizontal concatenation of the top and bottom frames
+        final_frame = np.zeros((final_frame_size[1], final_frame_size[0], 3), dtype=np.uint8)
+        
+        final_frame[0:480, 0:640] = frame1       # 左上
+        final_frame[0:480, 640:1280] = frame2    # 右上
+        final_frame[480:960, 0:640] = frame3     # 左下
+        final_frame[480:960, 640:1280] = frame4  # 右下
+        
+        cv2.imshow("frame", final_frame)
+
+
         lastkey = cv2.waitKey(1)
         if lastkey == ord("q"):
             cap_obj1.release()
@@ -51,7 +60,7 @@ def threadCapture(cap_number1, cap_number2,cap_number3,cap_number4):
             cv2.destroyAllWindows()
             break
         if lastkey == ord("c"):
-            cv2.imwrite("frame.png", frame)
+            cv2.imwrite("frame.png", final_frame)
 
 
 if __name__ == "__main__":
